@@ -1,7 +1,7 @@
 # klang
 My Small Language Project
 
-## TODO
+### TODO
 - [x] Scanner
 - [ ] Tokenizer
 - [ ] Parser
