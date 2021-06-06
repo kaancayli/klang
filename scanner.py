@@ -27,6 +27,7 @@ class Token(Enum):
     RCURLY = '}'
     IDENTIFIER = 'ident'
     NUMBER = 'number'
+    DIGIT = 'digit'
     IF = 'if'
     ELSE = 'else'
     WHILE = 'while'
@@ -39,9 +40,11 @@ class Token(Enum):
     SET = 'set'
     TUPLE = 'tuple'
     LAMBDA = 'lambda'
+    STRUCT = 'struct'
     RET = 'ret'
     NODE = 'node'
     ARROW = '->'
+    EOF = 'EOF'
 
 
 class Scanner:
@@ -49,7 +52,7 @@ class Scanner:
         self.__delimeters = {' ', '+', '-', '*', '/', ',', ';', '.', '>', '<', '=', '(', ')', '[', ']','{', '}', ':','\n'}
         self.__operators = {'+', '-', '*', '/', '>', '<'}
         self.__keywords = {'if', 'else', 'while', 'num', 'str', 
-            'type', 'list', 'map', 'set', 'tuple', 'lambda', 'ret', 'node', 'for', 'true', 'false'}
+            'type', 'list', 'map', 'set', 'tuple', 'lambda', 'ret', 'node', 'for', 'true', 'false', 'struct'}
 
     def __isDelimiter(self, seq:str):
         return seq in self.__delimeters
@@ -76,7 +79,7 @@ class Scanner:
             if (ch != '0' and ch != '1' and ch != '2' and 
                 ch != '3' and ch != '4' and ch != '5' and 
                 ch != '6'and ch != '7'and ch != '8' 
-                and ch != '9' and ch != '.' or (ch == '-' and i > 0)):
+                and ch != '9' or (ch == '-' and i > 0)):
                 return False
             i += 1
         return True
@@ -95,6 +98,10 @@ class Scanner:
                 right += 1
             
             if left == right and right < len(seq) and self.__isDelimiter(seq[right]):
+                if seq[right] == ' ' or seq[right] == '\n':
+                    right += 1
+                    left = right
+                    continue
                 if self.__isOperator(seq[right]):
                     if right + 2 <= len(seq) and (self.__isComparator(seq[left:right + 2]) or self.__isArrow(seq[left:right + 2])):
                         right += 1
@@ -110,7 +117,7 @@ class Scanner:
                 if self.__isKeyword(sub_seq):
                     tokens.append((Token(sub_seq).name, sub_seq))
                 elif self.__isNumber(sub_seq):
-                    tokens.append((Token('number').name, sub_seq))
+                    tokens.append((Token('digit').name, sub_seq))
                 elif self.__validIdentifier(sub_seq):
                     tokens.append((Token('ident').name, sub_seq))
                 left = right
@@ -118,12 +125,13 @@ class Scanner:
 if __name__ == '__main__':
     prog = 'lambda:num (a, b) -> a * b<='
     prog2 = """lambda:num (a) -> 
-    { 
+    {
         if (a <= 2) {
             ret true
         }
         ret false
-    }"""
+    }
+    """
     scanner = Scanner()
     tokens = scanner.parse(prog)
     print(prog)
