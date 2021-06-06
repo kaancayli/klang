@@ -12,8 +12,13 @@ class Token(Enum):
     DOT = '.'
     GT = '>'
     LT = '<'
-    EQ = '='
+    LTE = '<='
+    GRE = '>='
+    EQ = '=='
+    ASSIGN = '='
     EOL = '\n'
+    TRUE = 'true'
+    FALSE = 'false'
     LPARENT = '('
     RPARENT = ')'
     LSQUARE = '['
@@ -36,14 +41,15 @@ class Token(Enum):
     LAMBDA = 'lambda'
     RET = 'ret'
     NODE = 'node'
+    ARROW = '->'
 
 
 class Scanner:
     def __init__(self):
         self.__delimeters = {' ', '+', '-', '*', '/', ',', ';', '.', '>', '<', '=', '(', ')', '[', ']','{', '}', ':','\n'}
-        self.__operators = {'+', '-', '*', '/', '>', '<', '='}
+        self.__operators = {'+', '-', '*', '/', '>', '<'}
         self.__keywords = {'if', 'else', 'while', 'num', 'str', 
-            'type', 'list', 'map', 'set', 'tuple', 'lambda', 'ret', 'node', 'for'}
+            'type', 'list', 'map', 'set', 'tuple', 'lambda', 'ret', 'node', 'for', 'true', 'false'}
 
     def __isDelimiter(self, seq:str):
         return seq in self.__delimeters
@@ -58,6 +64,11 @@ class Scanner:
             seq[0] == '9' or self.__isDelimiter(seq[0]) == True):
             return False
         return True
+    def __isComparator(self, seq:str):
+        return seq == '==' or seq == '<=' or seq == '>='
+    
+    def __isArrow(self, seq:str):
+        return seq == '->'
 
     def __isNumber(self, seq:str):
         i = 0
@@ -82,9 +93,14 @@ class Scanner:
         while left <= right and right < len(seq):
             if right < len(seq) and not self.__isDelimiter(seq[right]) :
                 right += 1
+            
             if left == right and right < len(seq) and self.__isDelimiter(seq[right]):
                 if self.__isOperator(seq[right]):
-                    tokens.append((Token(seq[right]).name, seq[right]))
+                    if right + 2 <= len(seq) and (self.__isComparator(seq[left:right + 2]) or self.__isArrow(seq[left:right + 2])):
+                        right += 1
+                        tokens.append((Token(seq[left:right + 1]).name, seq[left:right + 1]))
+                    else :
+                        tokens.append((Token(seq[right]).name, seq[right]))
                 else :
                     tokens.append((Token(seq[right]).name, seq[right]))
                 right += 1
@@ -100,14 +116,13 @@ class Scanner:
                 left = right
         return tokens
 if __name__ == '__main__':
-    prog = 'lambda:num (a, b) -> a * b'
-    prog2 = """lambda:str (*args:str) -> 
+    prog = 'lambda:num (a, b) -> a * b<='
+    prog2 = """lambda:num (a) -> 
     { 
-        str result = '';
-        for i till 5 {
-            result += args[i];
+        if (a <= 2) {
+            ret true
         }
-    
+        ret false
     }"""
     scanner = Scanner()
     tokens = scanner.parse(prog)
