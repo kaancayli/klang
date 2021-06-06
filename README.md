@@ -3,7 +3,7 @@ My Small Language Project
 
 ### TODO
 - [x] Scanner
-- [ ] Tokenizer
+- [x] Tokenizer
 - [ ] Parser
 - [ ] Shell
 - [ ] AST
