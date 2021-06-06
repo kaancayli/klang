@@ -8,10 +8,12 @@ class Token(Enum):
     DIV = '/'
     COMMA = ','
     SEMI_COL = ';'
+    COLON = ':'
     DOT = '.'
     GT = '>'
     LT = '<'
     EQ = '='
+    EOL = '\n'
     LPARENT = '('
     RPARENT = ')'
     LSQUARE = '['
@@ -23,6 +25,7 @@ class Token(Enum):
     IF = 'if'
     ELSE = 'else'
     WHILE = 'while'
+    FOR = 'for'
     NUM = 'num'
     STR = 'str'
     TYPE = 'type'
@@ -30,17 +33,17 @@ class Token(Enum):
     MAP = 'map'
     SET = 'set'
     TUPLE = 'tuple'
-    PROC = 'proc'
+    LAMBDA = 'lambda'
     RET = 'ret'
     NODE = 'node'
 
 
 class Scanner:
     def __init__(self):
-        self.__delimeters = {' ', '+', '-', '*', '/', ',', ';', '.', '>', '<', '=', '(', ')', '[', ']','{', '}', '\n'}
+        self.__delimeters = {' ', '+', '-', '*', '/', ',', ';', '.', '>', '<', '=', '(', ')', '[', ']','{', '}', ':','\n'}
         self.__operators = {'+', '-', '*', '/', '>', '<', '='}
         self.__keywords = {'if', 'else', 'while', 'num', 'str', 
-            'type', 'list', 'map', 'set', 'tuple', 'proc', 'ret', 'node'}
+            'type', 'list', 'map', 'set', 'tuple', 'lambda', 'ret', 'node', 'for'}
 
     def __isDelimiter(self, seq:str):
         return seq in self.__delimeters
@@ -82,6 +85,8 @@ class Scanner:
             if left == right and right < len(seq) and self.__isDelimiter(seq[right]):
                 if self.__isOperator(seq[right]):
                     tokens.append((Token(seq[right]).name, seq[right]))
+                else :
+                    tokens.append((Token(seq[right]).name, seq[right]))
                 right += 1
                 left = right
             elif right == len(seq) and left != right or left != right and self.__isDelimiter(seq[right]) :
@@ -95,7 +100,19 @@ class Scanner:
                 left = right
         return tokens
 if __name__ == '__main__':
-    prog = 'num a = 5, ananınamı, 7, if, else proc ret \n proc'
+    prog = 'lambda:num (a, b) -> a * b'
+    prog2 = """lambda:str (*args:str) -> 
+    { 
+        str result = '';
+        for i till 5 {
+            result += args[i];
+        }
+    
+    }"""
     scanner = Scanner()
     tokens = scanner.parse(prog)
+    print(prog)
+    print(tokens)
+    tokens = scanner.parse(prog2)
+    print(prog2)
     print(tokens)
