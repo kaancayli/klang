@@ -19,7 +19,14 @@ class Interpreter:
     
     def factor(self):
         if self.lexer.next()[0] != Token.DIGIT.name:
-            print('Error')
+            if self.lexer.next()[0] == Token.LPARENT.name:
+                self.lexer.advance()
+                result = self.expr()
+                if self.lexer.next()[0] == Token.RPARENT.name:
+                    self.lexer.advance()
+                    return result
+            else:
+                raise RuntimeError
         self.lexer.advance()
         return int(self.lexer.curr_token[1])
     
@@ -36,7 +43,7 @@ class Interpreter:
     
 
 if __name__ == '__main__':
-    prog = '3 + 4 * 9 / 3'
+    prog = '(3 + 4 * 9) / 3 * 7'
     lexer = Lexer(prog)
     interpreter = Interpreter(lexer, prog)
     print(interpreter.expr())

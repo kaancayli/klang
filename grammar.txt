@@ -1,0 +1,4 @@
+expr : term ((ADD | PLUS) term)*
+term : factor ((MUL | DIV) factor)*
+factor : INTEGER
+         LPARENT expr RPARENT
