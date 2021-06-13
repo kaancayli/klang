@@ -1,12 +1,21 @@
-from AST import BinOpNode, NumberNode, UnOpNode, Eval
+from AST import BinOpNode, NumberNode, UnOpNode, VariableNode, Eval
 from lexer import Lexer
 from scanner import Token
+
+symbol_table = dict()
 
 class Interpreter:
     def __init__(self, lexer, prog):
         self.lexer = lexer
         self.prog = prog
     
+    def variable(self):
+        if self.lexer.next()[0] is Token.IDENTIFIER.name:
+            self.lexer.advance()
+            return VariableNode(self.lexer.curr_token[1])
+        else:
+            raise RuntimeError
+
     def term(self):
         node = self.factor()
         while self.lexer.next()[0] in (Token.MUL.name, Token.DIV.name):
@@ -34,6 +43,10 @@ class Interpreter:
                 token = self.lexer.next()[0]
                 self.lexer.advance()
                 return UnOpNode(token, self.factor())
+            elif self.lexer.next()[0] is Token.IDENTIFIER.name:
+                id = self.lexer.next()[1]
+                self.lexer.advance()
+                return NumberNode(symbol_table[id])
             else:
                 raise RuntimeError
 
@@ -52,12 +65,32 @@ class Interpreter:
             node = BinOpNode(node, token, self.term())
         return node
     
+    def stmt(self):
+        if self.lexer.next()[0] is Token.SEMI_COL.name:
+            self.lexer.advance()
+            return
+        while self.lexer.next()[0] is Token.IDENTIFIER.name:
+            id = self.variable()
+            if self.lexer.next()[0] is Token.ASSIGN.name:
+                self.lexer.advance()
+                result = self.expr().accept(Eval())
+                symbol_table[id.name] = result
+                if self.lexer.next()[0] is Token.SEMI_COL.name:
+                    self.lexer.advance()
+                else :
+                    raise RuntimeError
+            elif self.lexer.next()[0] is Token.SEMI_COL.name:
+                self.lexer.advance()
+                continue
+            else:
+                raise RuntimeError
+
+    
 
 if __name__ == '__main__':
-    prog = '(3 + 4 * 9) / 3 * -+-7'
+    prog = 'a = (3 + 4 * 9) / 3 * -+-7; b = a; c = 2*a; d = a + 2*c;'
     lexer = Lexer(prog)
     interpreter = Interpreter(lexer, prog)
-    ast = interpreter.expr()
-    print(ast)
-    result = ast.accept(Eval())
-    print("Result:", result)
+    ast = interpreter.stmt()
+    print("Result:", symbol_table)
+

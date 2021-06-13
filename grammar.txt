@@ -1,4 +1,9 @@
+statement : assignment_stmt | empty
+assignment_stmt : variable = expr
 expr : term ((ADD | PLUS) term)*
 term : factor ((MUL | DIV) factor)*
 factor : INTEGER
-         LPARENT expr RPARENT
+         | LPARENT expr RPARENT
+         | variable
+variable: IDENTIFIER
+empty: ;

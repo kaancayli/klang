@@ -13,6 +13,12 @@ class BinOpNode(AST):
     def __repr__(self) -> str:
         return f"BinOp({self.left}, {self.op}, {self.right})"
 
+class VariableNode(AST):
+    def __init__(self, name):
+        self.name:str = name
+    def __repr__(self) -> str:
+        return f"Variable({self.name})"
+
 class NumberNode(AST):
     def __init__(self, number):
         self.number = number
