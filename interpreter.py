@@ -60,4 +60,4 @@ if __name__ == '__main__':
     ast = interpreter.expr()
     print(ast)
     result = ast.accept(Eval())
-    print(result)
+    print("Result:", result)
