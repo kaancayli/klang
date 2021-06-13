@@ -1,4 +1,4 @@
-from AST import BinOpNode, NumberNode
+from AST import BinOpNode, NumberNode, UnOpNode, Eval
 from lexer import Lexer
 from scanner import Token
 
@@ -24,14 +24,19 @@ class Interpreter:
         if self.lexer.next()[0] != Token.DIGIT.name:
             if self.lexer.next()[0] == Token.LPARENT.name:
                 self.lexer.advance()
-                node = NumberNode(self.expr())
+                node = self.expr()
                 if self.lexer.next()[0] == Token.RPARENT.name:
                     self.lexer.advance()
                     return node
                 else :
                     raise RuntimeError
+            elif self.lexer.next()[0] in (Token.ADD.name, Token.SUB.name):
+                token = self.lexer.next()[0]
+                self.lexer.advance()
+                return UnOpNode(token, self.factor())
             else:
                 raise RuntimeError
+
         self.lexer.advance()
         return NumberNode(int(self.lexer.curr_token[1]))
     
@@ -49,8 +54,10 @@ class Interpreter:
     
 
 if __name__ == '__main__':
-    prog = '(3 + 4 * 9) / 3 * 7'
+    prog = '(3 + 4 * 9) / 3 * -+-7'
     lexer = Lexer(prog)
     interpreter = Interpreter(lexer, prog)
-    result = interpreter.expr()
+    ast = interpreter.expr()
+    print(ast)
+    result = ast.accept(Eval())
     print(result)
